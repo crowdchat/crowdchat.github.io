@@ -70,8 +70,8 @@
         <div id="content">
           <div class="jumbotron">
   <div class="container">
-    Hi. I&#8217;m CrowdChat Engineering.
-    <h3 class="tagline">Here are some thoughts of mine.</h3>
+    CrowdChat Engineering.
+    <h3 class="tagline">Yak Shaving.</h3>
   </div>
 </div>
 
@@ -104,6 +104,8 @@
           
           <div class="row-fluid">
           
+          <a href="/blog/categories/dani-rayan/"><span class="badge">Dani Rayan</span></a>
+          
           <a href="/blog/categories/machine-learning/"><span class="badge">Machine Learning</span></a>
           
           </div>
@@ -111,7 +113,26 @@
     </div>
     <div class="span10 post-container">
       <h1 class="link"><a href="/blog/2013/11/06/identifying-real-humans-on-twitter/">Identifying Real Humans on Twitter</a></h1>
-      <p>Twitter is ripe with fake accounts and noisy bots.</p>
+      <h1>EM Algorithm</h1>
+
+<p>Let’s recall the naive Bayes algorithm: given a tweet (a set of character n-grams), we estimate its language to be the language L that maximizes</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>P(language=L|ngrams)∝P(ngrams|language=L)P(language=L)
+</span><span class='line'>Thus, we need to estimate P(ngram|language=L) and P(language=L).</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This would be easy if we knew the language of each tweet, since we could estimate</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>P(xyz|language=English) as #(number of times “xyz” is a trigram in the English tweets) / #(total trigrams in the English tweets)
+</span><span class='line'>P(language=English) as the proportion of English tweets.
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or, it would also be easy if we knew the n-gram probabilities for each language, since we could use Bayes’ theorem to compute the language probabilities for each tweet, and then take a weighted variant of the previous paragraph.</p>
 
       
       
