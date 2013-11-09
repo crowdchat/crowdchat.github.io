@@ -4,7 +4,7 @@
   <title><![CDATA[CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2013-11-06T22:08:49-08:00</updated>
+  <updated>2013-11-08T23:23:22-08:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -18,7 +18,17 @@
     <link href="http://crowdchat.github.io/blog/2013/11/06/identifying-real-humans-on-twitter/"/>
     <updated>2013-11-06T16:58:00-08:00</updated>
     <id>http://crowdchat.github.io/blog/2013/11/06/identifying-real-humans-on-twitter</id>
-    <content type="html"><![CDATA[<h1>EM Algorithm</h1>
+    <content type="html"><![CDATA[<p>In CrowdChat platform, we have classified over 66M Twitter accounts and counting. The important precursor
+step: Finding out real-humans among those millions of accounts. This may appear as seemingly intuitive task for any average person, but is not so for the machines. This post descirbes how we approached the problem. The reader should refer further for the following concepts, but we will try to introduce them as briefly as possible.</p>
+
+<p>The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.</p>
+
+<p>Lets assume for now, H is language class of all self-described bios that sound like written by Humans.
+And B is the language class of all bios that are written by Bots/Organization Accounts/Non-Humans.</p>
+
+<p>A given tweet (in English) is composed of set of character n-grams.</p>
+
+<h1>EM Algorithm</h1>
 
 <p>Let’s recall the naive Bayes algorithm: given a tweet (a set of character n-grams), we estimate its language to be the language L that maximizes</p>
 
