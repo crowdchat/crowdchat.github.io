@@ -7,6 +7,15 @@ comments: true
 categories: [Machine Learning, Dani Rayan]
 ---
 
+In CrowdChat platform, we have classified over 66M Twitter accounts and counting. The important precursor
+step: Finding out real-humans among those millions of accounts. This may appear as seemingly intuitive task for any average person, but is not so for the machines. This post descirbes how we approached the problem. The reader should refer further for the following concepts, but we will try to introduce them as briefly as possible.
+
+The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.
+
+Lets assume for now, H is language class of all self-described bios that sound like written by Humans.
+And B is the language class of all bios that are written by Bots/Organization Accounts/Non-Humans.
+
+A given tweet (in English) is composed of set of character n-grams.
 #EM Algorithm
 
 Let’s recall the naive Bayes algorithm: given a tweet (a set of character n-grams), we estimate its language to be the language L that maximizes
