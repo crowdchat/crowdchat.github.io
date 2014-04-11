@@ -4,11 +4,16 @@ author: Dani Rayan
 title: "Identifying Real Humans on Twitter"
 date: 2013-11-06 16:58
 comments: true
-categories: [Machine Learning, Dani Rayan]
+author: Dani Rayan
+categories: 
+- Machine Learning
+- by Dani Rayan
 ---
 
 In CrowdChat platform, we have classified over 66M Twitter accounts and counting. The important precursor
 step: Finding out real-humans among those millions of accounts. This may appear as seemingly intuitive task for any average person, but is not so for the machines. This post descirbes how we approached the problem. The reader should refer further for the following concepts, but we will try to introduce them as briefly as possible.
+
+<!-- more -->
 
 The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.
 
