@@ -97,6 +97,57 @@
   
 
 
+<i class="icon-calendar-empty"></i> <time datetime="2014-04-11T12:37:00-07:00" pubdate data-updated="true">Apr 11<span>th</span>, 2014</time></h5>
+          <div class="row-fluid">
+          
+          </div>
+          
+          <div class="row-fluid">
+          
+          <a href="/blog/categories/facebook-graph/"><span class="badge">Facebook Graph</span></a>
+          
+          <a href="/blog/categories/node.js/"><span class="badge">Node.js</span></a>
+          
+          <a href="/blog/categories/by-george/"><span class="badge">by George</span></a>
+          
+          </div>
+          
+    </div>
+    <div class="span10 post-container">
+      <h1 class="link"><a href="/blog/2014/04/11/integrating-facebook-graph-api/">Integrating Facebook Graph API</a></h1>
+      <p>Facebook is undoubtedly the most popular social media site out on the internet and surprisingly it was difficult to find good support on accessing the Graph API using Node.js. So this is the approach we followed to perform basic actions on facebook for our app.</p>
+
+
+      
+       <a href="/blog/2014/04/11/integrating-facebook-graph-api/">Read on &rarr;</a> 
+    </div>
+  </div>
+
+
+
+    </article>
+    
+    <hr>
+    
+  
+  
+    <article>
+      
+
+  <div class="row-fluid">
+    <div class="span2 post-meta">
+	  <h5 class="date-time">
+
+
+
+
+
+
+
+
+  
+
+
 <i class="icon-calendar-empty"></i> <time datetime="2013-11-06T16:58:00-08:00" pubdate data-updated="true">Nov 6<span>th</span>, 2013</time></h5>
           <div class="row-fluid">
           
@@ -104,9 +155,9 @@
           
           <div class="row-fluid">
           
-          <a href="/blog/categories/dani-rayan/"><span class="badge">Dani Rayan</span></a>
-          
           <a href="/blog/categories/machine-learning/"><span class="badge">Machine Learning</span></a>
+          
+          <a href="/blog/categories/by-dani-rayan/"><span class="badge">by Dani Rayan</span></a>
           
           </div>
           
@@ -116,36 +167,9 @@
       <p>In CrowdChat platform, we have classified over 66M Twitter accounts and counting. The important precursor
 step: Finding out real-humans among those millions of accounts. This may appear as seemingly intuitive task for any average person, but is not so for the machines. This post descirbes how we approached the problem. The reader should refer further for the following concepts, but we will try to introduce them as briefly as possible.</p>
 
-<p>The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.</p>
-
-<p>Lets assume for now, H is language class of all self-described bios that sound like written by Humans.
-And B is the language class of all bios that are written by Bots/Organization Accounts/Non-Humans.</p>
-
-<p>A given tweet (in English) is composed of set of character n-grams.</p>
-
-<h1>EM Algorithm</h1>
-
-<p>Let’s recall the naive Bayes algorithm: given a tweet (a set of character n-grams), we estimate its language to be the language L that maximizes</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>P(language=L|ngrams)∝P(ngrams|language=L)P(language=L)
-</span><span class='line'>Thus, we need to estimate P(ngram|language=L) and P(language=L).</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This would be easy if we knew the language of each tweet, since we could estimate</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>P(xyz|language=English) as #(number of times “xyz” is a trigram in the English tweets) / #(total trigrams in the English tweets)
-</span><span class='line'>P(language=English) as the proportion of English tweets.
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Or, it would also be easy if we knew the n-gram probabilities for each language, since we could use Bayes’ theorem to compute the language probabilities for each tweet, and then take a weighted variant of the previous paragraph.</p>
 
       
-      
+       <a href="/blog/2013/11/06/identifying-real-humans-on-twitter/">Read on &rarr;</a> 
     </div>
   </div>
 
@@ -167,7 +191,7 @@ And B is the language class of all bios that are written by Bots/Organization Ac
       <div class="row-fluid">
         <footer class="footer-page" role="contentinfo">
           <p>
-  Copyright &copy; 2013 - CrowdChat Engineering -
+  Copyright &copy; 2014 - CrowdChat Engineering -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> - Theme by <a href="http://alexgaribay.com">Alex Garibay</a>
 </p>
 
