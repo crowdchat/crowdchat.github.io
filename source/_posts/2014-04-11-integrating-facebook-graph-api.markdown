@@ -8,6 +8,7 @@ categories:
 - Facebook Graph
 - Node.js
 - by George
+- by Narendra
 ---
 
 Facebook is undoubtedly the most popular social media site out on the internet and surprisingly it was difficult to find good support on accessing the Graph API using Node.js. So this is the approach we followed to perform basic actions on facebook for our app. 
