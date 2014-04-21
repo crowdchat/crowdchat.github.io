@@ -98,3 +98,10 @@ google_analytics_tracking_id: UA-42394665-2
 
 # Facebook Like
 facebook_like: false
+
+# Top bar navigation
+navigation:
+ - text: Home
+   url: https://www.crowdchat.net
+ - text: Engineering Blog
+   url: /
