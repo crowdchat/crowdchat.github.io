@@ -36,7 +36,7 @@ unigram = [“i”, “live”, “in” ,”california”, “and” , “work�
 bigrams = [“i live”, “live in”, “in california”, “california and” ,”and work”, “work at”, “at crowdchat”]
 
 
-Now its a 0-1 classification problem  , we got inspired by “Edwin chen’s blog post about a similar problem of filtering non english tweets from english tweets” <link todo> and decide to use the same technique.
+Now its a 0-1 classification problem  , we got inspired by “Edwin chen’s blog post about a similar problem of filtering non english tweets from english tweets” [(Link)](http://blog.echen.me/2011/05/01/unsupervised-language-detection-algorithms/)  and decide to use the same technique.
 
 
 #Some Basics:
