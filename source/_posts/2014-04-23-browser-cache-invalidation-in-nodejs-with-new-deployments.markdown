@@ -1,6 +1,7 @@
 ---
 layout: post
 title: "Browser cache invalidation in NodeJs with new deployments"
+author: Ankit Jain
 date: 2014-04-23 16:31
 comments: true
 categories: 
@@ -22,10 +23,14 @@ app.configure('production', function () {
     ...
 });
 ```
-However, the challenge is to discard or bust this client cache for new code deployments. As HTTP is a stateless protocol, there is no way server can tell clients to ignore old caches and request again. If you do set max-age:0 then we shall not arrive in this situation at all. However, we want to achieve caching and refresh this cache with new code deployments. As HTTP is a stateless protocol, one simple solution is to generate a new URL for the resource. What if we append app version as query string or folder path? 
+However, the challenge is to discard or bust this client cache for new code deployments. As HTTP is a stateless protocol, there is no way server can tell clients to ignore old caches and request again. If you do set max-age:0 then we shall not arrive in this situation at all. However, we want to achieve caching and refresh this cache with new code deployments. As HTTP is a stateless protocol, one simple solution is to generate a new URL for the resource. What if we append app version as query string or as folder path? 
 i.e.
 ```javascript
-/js/main.js?v-1.0 or /js/v-1.0/main.js. 
+/js/main.js?v-1.0 
+```
+or 
+```javascript
+/js/v-1.0/main.js. 
 ```
 Browsers will treat this as new URL and fetch again. NPM has a plugin `validator`, that exactly does this. The problem with npm:validator is - it requires to increment app version number for each new deployment or your sprint. If you forget to increment version no., you leave your clients buzzing with missing CSS classes. We can achieve this without introducing a new dependency. Let me simplify this and achieve the same using timestamps. Remember, less code keeps footprint limited! Solution In the following code we are trying to achieve a good caching period (30 days). Also this caching should not be applicable for your local development. We will be using app's start time as a substitute of version. (We have been using AWS-EBS for production deployments and each new deployment re-starts the app, giving new time-stamp with each deployment.)
 
