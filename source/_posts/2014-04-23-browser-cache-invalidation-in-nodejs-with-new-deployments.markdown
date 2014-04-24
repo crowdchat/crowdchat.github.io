@@ -26,7 +26,7 @@ app.configure('production', function () {
 However, the challenge is to discard or bust this client cache for new code deployments. As HTTP is a stateless protocol, there is no way server can tell clients to ignore old caches and request again. If you do set max-age:0 then we shall not arrive in this situation at all. However, we want to achieve caching and refresh this cache with new code deployments. As HTTP is a stateless protocol, one simple solution is to generate a new URL for the resource. What if we append app version as query string or as folder path? 
 i.e.
 ```javascript
-/js/main.js?v-1.0 or /js/v-1.0/main.js. 
+/js/main.js?v-1.0 
 ```
 or 
 ```javascript
