@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Machine Learning | CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2014-04-21T15:34:47-07:00</updated>
+  <updated>2014-04-23T17:13:50-07:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -88,6 +88,8 @@ P (human = 0 / Features)</p>
 
 <p>Repeat E-M steps until convergence or for arbitrary number of times.
 ```</p>
+
+<p>Author: <a href="https://twitter.com/@rayanandi">@rayanandi</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Node.js | CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/blog/categories/node-dot-js/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2014-04-21T15:34:47-07:00</updated>
+  <updated>2014-04-23T17:13:50-07:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -12,6 +12,100 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Browser cache invalidation in NodeJs with new deployments]]></title>
+    <link href="http://crowdchat.github.io/blog/2014/04/23/browser-cache-invalidation-in-nodejs-with-new-deployments/"/>
+    <updated>2014-04-23T16:31:00-07:00</updated>
+    <id>http://crowdchat.github.io/blog/2014/04/23/browser-cache-invalidation-in-nodejs-with-new-deployments</id>
+    <content type="html"><![CDATA[<p>Caching in Web browsers is important. Without caching page performance is hurt as each page navigation requires the same set of JavaScripts and CSS files to be re-fetched.</p>
+
+<!--more-->
+
+
+<p>We can achieve caching by setting Cache-Control header&rsquo;s max-age in the HTTP response headers. In NodeJS/Express stack, you do this done by passing options map to express.static() middle-ware. Here is an example:</p>
+
+<p>```javascript
+app.configure(&lsquo;production&rsquo;, function () {</p>
+
+<pre><code>...
+app.use(express.static(__dirname + '/public',
+        { maxAge: 864000000}  // 10 days!
+));
+...
+</code></pre>
+
+<p>});
+<code>
+However, the challenge is to discard or bust this client cache for new code deployments. As HTTP is a stateless protocol, there is no way server can tell clients to ignore old caches and request again. If you do set max-age:0 then we shall not arrive in this situation at all. However, we want to achieve caching and refresh this cache with new code deployments. As HTTP is a stateless protocol, one simple solution is to generate a new URL for the resource. What if we append app version as query string or folder path?
+i.e.
+</code>javascript
+/js/main.js?v-1.0 or /js/v-1.0/main.js.
+<code>``
+Browsers will treat this as new URL and fetch again. NPM has a plugin</code>validator`, that exactly does this. The problem with npm:validator is &ndash; it requires to increment app version number for each new deployment or your sprint. If you forget to increment version no., you leave your clients buzzing with missing CSS classes. We can achieve this without introducing a new dependency. Let me simplify this and achieve the same using timestamps. Remember, less code keeps footprint limited! Solution In the following code we are trying to achieve a good caching period (30 days). Also this caching should not be applicable for your local development. We will be using app&rsquo;s start time as a substitute of version. (We have been using AWS-EBS for production deployments and each new deployment re-starts the app, giving new time-stamp with each deployment.)</p>
+
+<p>```javascript
+//All jade&rsquo;s static resources should have: ?v=#{deployVersion}
+app.locals.deployVersion = (new Date).getTime();</p>
+
+<p>app.configure(&lsquo;production&rsquo;, function () {</p>
+
+<pre><code>...
+app.use(express.static(path.join(__dirname, 'public'),
+        { maxAge: 864000000 }
+));
+...
+</code></pre>
+
+<p>});
+app.configure(&lsquo;development&rsquo;, function () {</p>
+
+<pre><code>...
+app.use(express.static(path.join(__dirname, 'public'),
+        { maxAge: 0 }
+));
+
+app.locals.pretty = true; // why not prettify while coding :)
+...
+</code></pre>
+
+<p>});</p>
+
+<p>//We need to suffix all resource path with ?v=#{deployVersion} in all jade files.
+//(Note: App&rsquo;s locals are available across jade.)</p>
+
+<p>link(rel=&lsquo;stylesheet&rsquo;, href=&lsquo;<a href="http://crowdchat.github.io/css/index.css?v=#">http://crowdchat.github.io/css/index.css?v=#</a>{deployVersion}&rsquo;)
+script(type=&lsquo;text/javascript&rsquo;, src=&lsquo;<a href="http://crowdchat.github.io/js/index.js?v=#">http://crowdchat.github.io/js/index.js?v=#</a>{deployVersion}&rsquo;)
+script(type=&lsquo;text/javascript&rsquo;, src=&lsquo;<a href="http://crowdchat.github.io/js/bootstrap.min.js?v=#">http://crowdchat.github.io/js/bootstrap.min.js?v=#</a>{deployVersion}&rsquo;)
+This renders all your resource URLs as follows forcing browser to request new resource.
+link(rel=&lsquo;stylesheet&rsquo;, href=&lsquo;<a href="http://crowdchat.github.io/css/index.css?v=1386176288126">http://crowdchat.github.io/css/index.css?v=1386176288126</a>&rsquo;)
+script(type=&lsquo;text/javascript&rsquo;, src=&lsquo;<a href="http://crowdchat.github.io/js/index.js?v=1386176288126">http://crowdchat.github.io/js/index.js?v=1386176288126</a>&rsquo;)
+script(type=&lsquo;text/javascript&rsquo;, src=&lsquo;<a href="http://crowdchat.github.io/js/bootstrap.min.js?v=1386176288126">http://crowdchat.github.io/js/bootstrap.min.js?v=1386176288126</a>&rsquo;)
+```</p>
+
+<h1>What if you have distributed deployment?</h1>
+
+<p>If you planning to deploy your app on AWS Elastic Beanstalk having auto scale (more than one app server), than above shall not work efficiently as each client browser may hit to new app server seeing a different time-stamp! Let&rsquo;s solve this by clustering all app starts in a 5 min span.
+```javascript
+app.locals.deployVersion =</p>
+
+<pre><code>       Math.ceil((new Date).getTime()/300000)*300000;
+</code></pre>
+
+<p>```</p>
+
+<h1>More ideas:</h1>
+
+<ol>
+<li>Serve files with an MD5 hash suffix. Try: Connect-Assets</li>
+<li>Using GIT log as deployVersion. Integrate GIT api in project and read last commit ID</li>
+<li>Incrementing app version number in each sprint :down:</li>
+</ol>
+
+
+<p>Author: <a href="https://twitter.com/@geekpack">@geekpack</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Integrating Facebook Graph API]]></title>
@@ -197,6 +291,8 @@ That kinda sums up the basics of using the graph api using node js. There is muc
 
 <p><strong>SHOUT OUTS</strong>
 Thanks to <a href="https://twitter.com/@non_local">@non_local</a> and <a href="https://twitter.com/@geekpack">@geekpack</a> for allowing me to work on this endeavor of theirs.</p>
+
+<p>Author: <a href="https://twitter.com/@non_local">@non_local</a></p>
 ]]></content>
   </entry>
   

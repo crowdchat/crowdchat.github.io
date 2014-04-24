@@ -4,7 +4,7 @@
   <title><![CDATA[CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2014-04-21T15:34:47-07:00</updated>
+  <updated>2014-04-23T17:13:50-07:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Browser cache invalidation in NodeJs with new deployments]]></title>
+    <link href="http://crowdchat.github.io/blog/2014/04/23/browser-cache-invalidation-in-nodejs-with-new-deployments/"/>
+    <updated>2014-04-23T16:31:00-07:00</updated>
+    <id>http://crowdchat.github.io/blog/2014/04/23/browser-cache-invalidation-in-nodejs-with-new-deployments</id>
+    <content type="html"><![CDATA[<p>Caching in Web browsers is important. Without caching page performance is hurt as each page navigation requires the same set of JavaScripts and CSS files to be re-fetched.</p>
+
+<!--more-->
+
+
+<p>We can achieve caching by setting Cache-Control header&rsquo;s max-age in the HTTP response headers. In NodeJS/Express stack, you do this done by passing options map to express.static() middle-ware. Here is an example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;production&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/public&#39;</span><span class="p">,</span>
+</span><span class='line'>          <span class="p">{</span> <span class="nx">maxAge</span><span class="o">:</span> <span class="mi">864000000</span><span class="p">}</span>  <span class="c1">// 10 days!</span>
+</span><span class='line'>    <span class="p">));</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, the challenge is to discard or bust this client cache for new code deployments. As HTTP is a stateless protocol, there is no way server can tell clients to ignore old caches and request again. If you do set max-age:0 then we shall not arrive in this situation at all. However, we want to achieve caching and refresh this cache with new code deployments. As HTTP is a stateless protocol, one simple solution is to generate a new URL for the resource. What if we append app version as query string or folder path?
+i.e.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="err">/js/main.js?v-1.0 or /js/v-1.0/main.js. </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Browsers will treat this as new URL and fetch again. NPM has a plugin <code>validator</code>, that exactly does this. The problem with npm:validator is &ndash; it requires to increment app version number for each new deployment or your sprint. If you forget to increment version no., you leave your clients buzzing with missing CSS classes. We can achieve this without introducing a new dependency. Let me simplify this and achieve the same using timestamps. Remember, less code keeps footprint limited! Solution In the following code we are trying to achieve a good caching period (30 days). Also this caching should not be applicable for your local development. We will be using app&rsquo;s start time as a substitute of version. (We have been using AWS-EBS for production deployments and each new deployment re-starts the app, giving new time-stamp with each deployment.)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="c1">//All jade&#39;s static resources should have: ?v=#{deployVersion}</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">locals</span><span class="p">.</span><span class="nx">deployVersion</span> <span class="o">=</span> <span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">).</span><span class="nx">getTime</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;production&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;public&#39;</span><span class="p">),</span>
+</span><span class='line'>          <span class="p">{</span> <span class="nx">maxAge</span><span class="o">:</span> <span class="mi">864000000</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">));</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">configure</span><span class="p">(</span><span class="s1">&#39;development&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;public&#39;</span><span class="p">),</span>
+</span><span class='line'>          <span class="p">{</span> <span class="nx">maxAge</span><span class="o">:</span> <span class="mi">0</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">locals</span><span class="p">.</span><span class="nx">pretty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span> <span class="c1">// why not prettify while coding :)</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//We need to suffix all resource path with ?v=#{deployVersion} in all jade files. </span>
+</span><span class='line'><span class="c1">//(Note: App&#39;s locals are available across jade.)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">link</span><span class="p">(</span><span class="nx">rel</span><span class="o">=</span><span class="s1">&#39;stylesheet&#39;</span><span class="p">,</span> <span class="nx">href</span><span class="o">=</span><span class="s1">&#39;/css/index.css?v=#{deployVersion}&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="nx">script</span><span class="p">(</span><span class="nx">type</span><span class="o">=</span><span class="s1">&#39;text/javascript&#39;</span><span class="p">,</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;/js/index.js?v=#{deployVersion}&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="nx">script</span><span class="p">(</span><span class="nx">type</span><span class="o">=</span><span class="s1">&#39;text/javascript&#39;</span><span class="p">,</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;/js/bootstrap.min.js?v=#{deployVersion}&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="nx">This</span> <span class="nx">renders</span> <span class="nx">all</span> <span class="nx">your</span> <span class="nx">resource</span> <span class="nx">URLs</span> <span class="nx">as</span> <span class="nx">follows</span> <span class="nx">forcing</span> <span class="nx">browser</span> <span class="nx">to</span> <span class="nx">request</span> <span class="k">new</span> <span class="nx">resource</span><span class="p">.</span>
+</span><span class='line'><span class="nx">link</span><span class="p">(</span><span class="nx">rel</span><span class="o">=</span><span class="s1">&#39;stylesheet&#39;</span><span class="p">,</span> <span class="nx">href</span><span class="o">=</span><span class="s1">&#39;/css/index.css?v=1386176288126&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="nx">script</span><span class="p">(</span><span class="nx">type</span><span class="o">=</span><span class="s1">&#39;text/javascript&#39;</span><span class="p">,</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;/js/index.js?v=1386176288126&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="nx">script</span><span class="p">(</span><span class="nx">type</span><span class="o">=</span><span class="s1">&#39;text/javascript&#39;</span><span class="p">,</span> <span class="nx">src</span><span class="o">=</span><span class="s1">&#39;/js/bootstrap.min.js?v=1386176288126&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>What if you have distributed deployment?</h1>
+
+<p>If you planning to deploy your app on AWS Elastic Beanstalk having auto scale (more than one app server), than above shall not work efficiently as each client browser may hit to new app server seeing a different time-stamp! Let&rsquo;s solve this by clustering all app starts in a 5 min span.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">locals</span><span class="p">.</span><span class="nx">deployVersion</span> <span class="o">=</span>
+</span><span class='line'>           <span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">((</span><span class="k">new</span> <span class="nb">Date</span><span class="p">).</span><span class="nx">getTime</span><span class="p">()</span><span class="o">/</span><span class="mi">300000</span><span class="p">)</span><span class="o">*</span><span class="mi">300000</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>More ideas:</h1>
+
+<ol>
+<li>Serve files with an MD5 hash suffix. Try: Connect-Assets</li>
+<li>Using GIT log as deployVersion. Integrate GIT api in project and read last commit ID</li>
+<li>Incrementing app version number in each sprint :down:</li>
+</ol>
+
+
+<p>Author: <a href="https://twitter.com/@geekpack">@geekpack</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Integrating Facebook Graph API]]></title>
@@ -268,6 +394,8 @@ That kinda sums up the basics of using the graph api using node js. There is muc
 
 <p><strong>SHOUT OUTS</strong>
 Thanks to <a href="https://twitter.com/@non_local">@non_local</a> and <a href="https://twitter.com/@geekpack">@geekpack</a> for allowing me to work on this endeavor of theirs.</p>
+
+<p>Author: <a href="https://twitter.com/@non_local">@non_local</a></p>
 ]]></content>
   </entry>
   
@@ -364,6 +492,8 @@ bigrams = [“i live”, “live in”, “in california”, “california and�
 </span><span class='line'>
 </span><span class='line'>Repeat E-M steps until convergence or for arbitrary number of times.</span></code></pre></td></tr></table></div></figure>
 
+
+<p>Author: <a href="https://twitter.com/@rayanandi">@rayanandi</a></p>
 ]]></content>
   </entry>
   

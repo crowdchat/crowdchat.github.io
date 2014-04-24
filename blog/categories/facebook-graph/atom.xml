@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Facebook Graph | CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/blog/categories/facebook-graph/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2014-04-21T15:34:47-07:00</updated>
+  <updated>2014-04-23T17:13:50-07:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -197,6 +197,8 @@ That kinda sums up the basics of using the graph api using node js. There is muc
 
 <p><strong>SHOUT OUTS</strong>
 Thanks to <a href="https://twitter.com/@non_local">@non_local</a> and <a href="https://twitter.com/@geekpack">@geekpack</a> for allowing me to work on this endeavor of theirs.</p>
+
+<p>Author: <a href="https://twitter.com/@non_local">@non_local</a></p>
 ]]></content>
   </entry>
   
