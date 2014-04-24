@@ -7,8 +7,6 @@ author: Narendra Yadala
 categories: 
 - Facebook Graph
 - Node.js
-- by George
-- by Narendra
 ---
 
 Facebook is undoubtedly the most popular social media site out on the internet and surprisingly it was difficult to find good support on accessing the Graph API using Node.js. So this is the approach we followed to perform basic actions on facebook for our app. 
@@ -160,3 +158,4 @@ That kinda sums up the basics of using the graph api using node js. There is muc
 <strong>SHOUT OUTS</strong>
 Thanks to <a href="https://twitter.com/@non_local">@non_local</a> and <a href="https://twitter.com/@geekpack">@geekpack</a> for allowing me to work on this endeavor of theirs.
 
+Author: <a href="https://twitter.com/@non_local">@non_local</a>

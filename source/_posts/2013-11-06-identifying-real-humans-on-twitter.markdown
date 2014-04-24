@@ -7,7 +7,6 @@ comments: true
 author: Dani Rayan
 categories: 
 - Machine Learning
-- by Dani Rayan
 ---
 
 In CrowdChat platform, we have classified over 66M Twitter accounts and counting. The important precursor
@@ -80,3 +79,5 @@ P (human = 0 / Features)
 
 Repeat E-M steps until convergence or for arbitrary number of times.
 ```
+
+Author: <a href="https://twitter.com/@rayanandi">@rayanandi</a>
