@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Load Testing Using NodeJs Async - CrowdChat Engineering</title>
+  <meta name="author" content="CrowdChat Engineering">
+
+   
+  <meta name="description" content="">
+  
+  <meta name="keywords" content="">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://crowdchat.github.io/blog/2014/04/24/load-testing-using-nodejs-async">
+  <link href="/favicon.png" rel="icon">
+  <link href='http://fonts.googleapis.com/css?family=Quicksand:300,400' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="CrowdChat Engineering" type="application/atom+xml">
+  <script src="/js/jquery.js"></script>
+  <script src="/js/bootstrap-collapse.js"></script>
+  <script src="/js/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/js/octopress.js" type="text/javascript"></script>
+  <script src="/js/application.js"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-42394665-2']);
+    _gaq.push(['_trackPageview']);
+    _gaq.push(['_setDomainName','github.io']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <div class="navbar navbar-inverse navbar-static-top">
+  	<div class="navbar-inner">
+  	  <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-responsive-collapse">
+          <span class="fui-menu-24"></span>
+        </a>
+  	  	<div class="nav-collapse collapse navbar-responsive-collapse" style="height:0;">
+  	      <ul class="nav">
+    
+        <li ><a href="https://www.crowdchat.net">Home</a></li>
+    
+        <li ><a href="/">Engineering Blog</a></li>
+    
+</ul>
+
+<ul class="nav pull-right">
+    
+    
+    
+    
+    
+    
+</ul>
+
+  	    </div>
+  	  </div>
+  	</div>
+  </div>
+  <div class="container" id="main">
+      <div class="row-fluid">
+        <div id="content">
+          <div>
+<article class="hentry" role="article">
+  
+
+  <header>
+  <div class="jumbotron">
+    Load Testing Using NodeJs Async
+	<h5>
+
+
+
+
+
+
+
+
+  
+
+
+<i class="icon-calendar-empty"></i> <time datetime="2014-04-24T16:27:00-07:00" pubdate data-updated="true">Apr 24<span>th</span>, 2014</time></h5>
+  </div>
+</header>
+  <div class="row-fluid">
+    <div class="span12">
+      <p>NodeJS is a platform for building applications using JavaScript. JavaScript is single threaded and has callback architecture. How about using this for load testing a Web server? Often we are limited by the tools and their feature set. If you are familiar with NodeJs, here is my quick solution for customized load testing.</p>
+
+<!--more-->
+
+
+<h3>Background</h3>
+
+<p><a href="https://github.com/caolan/async">Async</a> is one of the most popular node module for code organization in JavaScript otherwise you end up in callback hell. Let&rsquo;s create a nodejs project and add async as one of the dependencies.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&lt;projectDir&gt;
+</span><span class='line'>  |
+</span><span class='line'>  +-- package.json
+</span><span class='line'>  +-- app.js</span></code></pre></td></tr></table></div></figure>
+
+
+<p>package.json:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>{
+</span><span class='line'>  "name": "CrowdChat",
+</span><span class='line'>  "version": "0.0.1",
+</span><span class='line'>  "private": true,
+</span><span class='line'>  "dependencies": {
+</span><span class='line'>    "async": "0.2.9"
+</span><span class='line'>  }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Making HTTP requests in NodeJS</h3>
+
+<p>Let&rsquo;s make our HTTP request:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>function getResponse(param, callback) {
+</span><span class='line'>    var options = { 
+</span><span class='line'>        hostname: 'customer.crowdspots.com',
+</span><span class='line'>        path: '/someApi?query=' + encodeURIComponent(param),
+</span><span class='line'>        method: 'GET'
+</span><span class='line'>      }
+</span><span class='line'>    var results = ''; 
+</span><span class='line'>    var req = http.request(options, function(res) {
+</span><span class='line'>        res.on('data', function (chunk) {
+</span><span class='line'>            results = results + chunk;
+</span><span class='line'>        }); 
+</span><span class='line'>        res.on('end', function () {
+</span><span class='line'>            callback.apply(this, [null, results]);
+</span><span class='line'>        }); 
+</span><span class='line'>    });
+</span><span class='line'>
+</span><span class='line'>    req.on('error', function(e) {
+</span><span class='line'>        console.error('Error in fetching: ' + param + e);
+</span><span class='line'>        callback.apply(this, [e, results]);
+</span><span class='line'>    });
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you are not interested in response data, you can skip <code>res.on('data',..)</code> event and just have <code>end</code> event for callback.</p>
+
+<p>That&rsquo;s how simple is to make HTTP GET requests. For our usecase we needed to fire a test only after user logs in. Hence, I hacked the user cookie from Web Browser and passed in request options. You can achieve further customizations using HTTP Headers (accepts language, cookie, caching control, connections alive, etc.).</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var options = { 
+</span><span class='line'>    hostname: 'customer.crowdspots.com',
+</span><span class='line'>    path: '/somePage?query=' + encodeURIComponent(param),
+</span><span class='line'>    method: 'GET',
+</span><span class='line'>    headers: {'Cookie': 'JSESSIONID=7F868662EB6182B14E9A15E9E68E19EA'}
+</span><span class='line'>  }
+</span><span class='line'>};</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Firing parallel request</h3>
+
+<p>The async library comes up with asynchronous control flow patterns like serial, each, parallel, waterfall, each, eachLimit, etc. For load testing one particular we are interested is <code>eachLimit</code> with limit.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>eachLimit(arr, limit, iterator, callback)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>eachLimit</code> executes the <code>iterator</code> function in parallel for each of the items in the array. However it will ensure not more than <code>limit</code> parallel iterators running. Let&rsquo;s assume we have a collection of parameters and each parameter represent independent argument for request to the web server.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>var PARALLEL_N = 20;
+</span><span class='line'>var paramsArray = [ "Hyderabad", "India", "Gujarat" , "Ahmedabad" , "USA", "New York" ];
+</span><span class='line'>var successCount = 0;
+</span><span class='line'>var errorCount = 0;
+</span><span class='line'>var totalTime = 0;
+</span><span class='line'>async.eachLimit(paramsArray, PARALLEL_N, 
+</span><span class='line'>      function(item, myCallback){
+</span><span class='line'>          var startTime = new Date();
+</span><span class='line'>          getResponse(item, function(err, result){
+</span><span class='line'>                  var time = (new Date() - startTime);
+</span><span class='line'>                  totalTime = totalTime + time;
+</span><span class='line'>                  if(err) {
+</span><span class='line'>                  }
+</span><span class='line'>                  if(result) {
+</span><span class='line'>                      successCount++;
+</span><span class='line'>                  }
+</span><span class='line'>                  myCallback();
+</span><span class='line'>          });
+</span><span class='line'>      },
+</span><span class='line'>      function(err, result) {
+</span><span class='line'>          console.log('AvgTime=' + (totalTime/paramsArray.length) + ', SuccessCount=' + nonZeroCount + ', errorCount=' + errorCount);
+</span><span class='line'>      }
+</span><span class='line'>);</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Store this code in app.js and run as follows:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ node app.js</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Start your test with different values of PARALLEL_N = 5, 10, 25, 50, 75, 100, 200&hellip;</p>
+
+<h3>Validating Results</h3>
+
+<p>Ensure following points to prevent skewed results.</p>
+
+<ul>
+<li>The above example is a small demonstration with just 6 <code>paramsArray</code>. Typically you should do testing by making at least <code>100*PARALLEL_N</code> requests.</li>
+<li>There is <em>startup overhead</em> where you should skip initial <code>PARALLEL_N</code> which are responsible for warming up the load.</li>
+<li>If the HTTP responses are big, keep an eye on network bandwidth. Network bandwidth can also be a bottleneck to skew results.</li>
+</ul>
+
+
+<p>Author: <a href="https://twitter.com/@geekpack">@geekpack</a>, <a href="https://ankitjain.info/">Ankit Jain</a></p>
+
+    </div>
+  </div>
+
+
+
+  <footer>
+    <hr>
+    
+    <div class="row-fluid">
+      
+      <div class="span6">
+        <p class="meta">
+        
+        
+
+
+
+  <a href="/blog/categories/nodejs/"><span class="badge">Nodejs</span></a>
+
+  <a href="/blog/categories/http/"><span class="badge">http</span></a>
+
+  <a href="/blog/categories/load-testing/"><span class="badge">load-testing</span></a>
+
+
+
+
+        </p>
+      </div>
+      
+      <div class="span6 social-sharing">
+        <div class="sharing">
+  <div class="addthis_toolbox addthis_default_style ">
+  
+  
+  <a class="addthis_button_tweet"></a>
+  
+  
+  <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid="></script>
+</div>
+
+      </div>
+      
+      
+    </div>
+    
+    <div class="row-fluid">
+      <div class="span12">
+        <p class="meta">
+          
+            <a class="basic-alignment left" href="/blog/2014/04/23/browser-cache-invalidation-in-nodejs-with-new-deployments/" title="Previous Post: Browser cache invalidation in NodeJs with new deployments">&laquo; Browser cache invalidation in NodeJs with new deployments</a>
+          
+          
+        </p>
+      </div>
+    </div>
+  </footer>
+</article>
+
+</div>
+
+
+
+        </div>
+      </div>
+      <div class="row-fluid">
+        <footer class="footer-page" role="contentinfo">
+          <p>
+  Copyright &copy; 2014 - CrowdChat Engineering -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span> - Theme by <a href="http://alexgaribay.com">Alex Garibay</a>
+</p>
+
+
+        </footer>
+      </div>
+  </div>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
