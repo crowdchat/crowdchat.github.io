@@ -115,9 +115,13 @@ step: Finding out real-humans among those millions of accounts. This may appear 
 <!-- more -->
 
 
-<p>Problem:
-Given an twitter handle, detect whether the account is a real human or non human
-A non human account could be either organizational or a bot.</p>
+<p>Problem:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Given an twitter handle, detect whether the account is a real human or non human 
+</span><span class='line'>A non human account could be either organizational or a bot.</span></code></pre></td></tr></table></div></figure>
+
 
 <p>The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.</p>
 
@@ -162,6 +166,16 @@ bigrams = [“i live”, “live in”, “in california”, “california and�
 
 <p>Or, it would also be easy if we knew the n-gram probabilities for each language, since we could use Bayes’ theorem to compute the language probabilities for each tweet, and then take a weighted variant of the previous paragraph.</p>
 
+<p>Thus, we bootstrap using a two-step process:</p>
+
+<ol>
+<li>Using Seed rules , assign human (label =1) or non human (label = 0 ).</li>
+<li>If seed rule does not pass , assign a label randomly..</li>
+</ol>
+
+
+<p>Then follow this approach, till the solution converges.</p>
+
 <h1>Solution Outline:</h1>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -174,26 +188,14 @@ bigrams = [“i live”, “live in”, “in california”, “california and�
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>1. Using Seed rules , assign human (label =1) or non human (label = 0 ) for the accounts in the vertical.
-</span><span class='line'>2. If seed rule does not pass , assign a label randomly..
-</span><span class='line'>
-</span><span class='line'>E- Step: Using the labels computed , compute conditional n-gram probability 
+</pre></td><td class='code'><pre><code class=''><span class='line'>E- Step: Using the labels computed , compute conditional n-gram probability 
 </span><span class='line'>P(Ngram / label =1) 
 </span><span class='line'>P(Ngram / label = 0)
-</span><span class='line'>
 </span><span class='line'>
 </span><span class='line'>M-Step: Using the n-gram probability - compute human / non human probability
 </span><span class='line'>
 </span><span class='line'>P(Human  = 1 / features)
 </span><span class='line'>P (human = 0 / Features)
-</span><span class='line'>
 </span><span class='line'>
 </span><span class='line'>Repeat E-M steps until convergence or for arbitrary number of times.</span></code></pre></td></tr></table></div></figure>
 

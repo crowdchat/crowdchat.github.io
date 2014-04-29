@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Machine Learning | CrowdChat Engineering]]></title>
   <link href="http://crowdchat.github.io/blog/categories/machine-learning/atom.xml" rel="self"/>
   <link href="http://crowdchat.github.io/"/>
-  <updated>2014-04-24T16:45:57-07:00</updated>
+  <updated>2014-04-29T15:20:45-07:00</updated>
   <id>http://crowdchat.github.io/</id>
   <author>
     <name><![CDATA[CrowdChat Engineering]]></name>
@@ -25,8 +25,10 @@ step: Finding out real-humans among those millions of accounts. This may appear 
 
 
 <p>Problem:
+<code>
 Given an twitter handle, detect whether the account is a real human or non human
-A non human account could be either organizational or a bot.</p>
+A non human account could be either organizational or a bot.
+</code></p>
 
 <p>The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.</p>
 
@@ -67,17 +69,20 @@ P(language=English) as the proportion of English tweets.</p>
 
 <p>Or, it would also be easy if we knew the n-gram probabilities for each language, since we could use Bayes’ theorem to compute the language probabilities for each tweet, and then take a weighted variant of the previous paragraph.</p>
 
-<h1>Solution Outline:</h1>
-
-<p>```</p>
+<p>Thus, we bootstrap using a two-step process:</p>
 
 <ol>
-<li>Using Seed rules , assign human (label =1) or non human (label = 0 ) for the accounts in the vertical.</li>
+<li>Using Seed rules , assign human (label =1) or non human (label = 0 ).</li>
 <li>If seed rule does not pass , assign a label randomly..</li>
 </ol>
 
 
-<p>E- Step: Using the labels computed , compute conditional n-gram probability
+<p>Then follow this approach, till the solution converges.</p>
+
+<h1>Solution Outline:</h1>
+
+<p>```
+E- Step: Using the labels computed , compute conditional n-gram probability
 P(Ngram / label =1)
 P(Ngram / label = 0)</p>
 
