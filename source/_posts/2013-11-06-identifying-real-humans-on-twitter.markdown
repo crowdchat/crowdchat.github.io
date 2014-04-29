@@ -15,8 +15,10 @@ step: Finding out real-humans among those millions of accounts. This may appear 
 <!-- more -->
 
 Problem:
+```
 Given an twitter handle, detect whether the account is a real human or non human 
 A non human account could be either organizational or a bot.
+```
 
 The of problem of identifying, if a twitter account belongs to real-human or not can be translated to the problem of identifying if their self-described bio belongs to a language class H.
 
@@ -59,23 +61,24 @@ P(language=English) as the proportion of English tweets.
 
 Or, it would also be easy if we knew the n-gram probabilities for each language, since we could use Bayes’ theorem to compute the language probabilities for each tweet, and then take a weighted variant of the previous paragraph.
 
+Thus, we bootstrap using a two-step process:
+
+1. Using Seed rules , assign human (label =1) or non human (label = 0 ).
+2. If seed rule does not pass , assign a label randomly..
+
+Then follow this approach, till the solution converges.
+
 #Solution Outline:
 
 ```
-
-1. Using Seed rules , assign human (label =1) or non human (label = 0 ) for the accounts in the vertical.
-2. If seed rule does not pass , assign a label randomly..
-
 E- Step: Using the labels computed , compute conditional n-gram probability 
 P(Ngram / label =1) 
 P(Ngram / label = 0)
-
 
 M-Step: Using the n-gram probability - compute human / non human probability
 
 P(Human  = 1 / features)
 P (human = 0 / Features)
-
 
 Repeat E-M steps until convergence or for arbitrary number of times.
 ```
